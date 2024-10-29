@@ -1,0 +1,14 @@
+cloudflare-vectorize/
+├── LICENSE
+├── README.md
+├── pyproject.toml
+├── setup.cfg
+├── src/
+│   └── cloudflare_vectorize/
+│       ├── __init__.py
+│       ├── client.py
+│       ├── exceptions.py
+│       └── utils.py
+└── tests/
+    ├── __init__.py
+    └── test_client.py 
