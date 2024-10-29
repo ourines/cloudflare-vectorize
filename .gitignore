@@ -37,4 +37,23 @@ env/
 .coverage
 htmlcov/
 .tox/
-.pytest_cache/ 
+.pytest_cache/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Secrets
+*.pem
+*.key
+*.crt
+.pypirc
+
+# OS
+.DS_Store
+Thumbs.db
