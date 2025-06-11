@@ -4,7 +4,7 @@ import json
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Any
 from .exceptions import AuthenticationError, APIError
 from .utils import validate_response, validate_vector_format
 
@@ -192,7 +192,8 @@ class CloudflareVectorize:
     def insert_vectors(self, 
                       index_name: str, 
                       vectors_data: str, 
-                      unparsable_behavior: str = "error") -> Dict:
+                      unparsable_behavior: str = "error",
+                      namespace: Optional[str] = None) -> Dict:
         """
         插入向量
         
@@ -200,6 +201,7 @@ class CloudflareVectorize:
             index_name: 索引名称
             vectors_data: NDJSON格式的向量数据
             unparsable_behavior: 解析失败处理方式 (error/discard)
+            namespace: 命名空间，用于分段管理向量（可选，最大64字符）
             
         Returns:
             包含mutation_id的响应数据
@@ -207,7 +209,27 @@ class CloudflareVectorize:
         Raises:
             ValueError: 当向量数据格式无效时
             APIError: 当API调用失败时
+            
+        Note:
+            如果指定了namespace参数，会自动为vectors_data中的每个向量添加namespace字段
         """
+        # 如果指定了namespace，需要为每个向量添加namespace字段
+        if namespace is not None:
+            if not namespace:
+                raise ValueError("Namespace cannot be empty")
+            if len(namespace) > 64:
+                raise ValueError("Namespace cannot exceed 64 characters")
+            
+            # 解析NDJSON并添加namespace
+            lines = vectors_data.strip().split('\n')
+            updated_lines = []
+            for line in lines:
+                if line.strip():
+                    vector = json.loads(line)
+                    vector['namespace'] = namespace
+                    updated_lines.append(json.dumps(vector))
+            vectors_data = '\n'.join(updated_lines)
+        
         # 验证向量数据格式
         validate_vector_format(vectors_data)
         
@@ -225,7 +247,8 @@ class CloudflareVectorize:
                      top_k: int = 5,
                      filter: Optional[Dict] = None,
                      return_metadata: str = "none",
-                     return_values: bool = False) -> Dict:
+                     return_values: bool = False,
+                     namespace: Optional[str] = None) -> Dict:
         """
         查询最近邻向量
         
@@ -236,6 +259,7 @@ class CloudflareVectorize:
             filter: 元数据过滤条件
             return_metadata: 返回元数据类型 (none/indexed/all)
             return_values: 是否返回向量值
+            namespace: 命名空间，仅在指定的命名空间内搜索（可选）
             
         Returns:
             包含匹配向量的响应数据
@@ -251,6 +275,11 @@ class CloudflareVectorize:
             raise ValueError("return_metadata must be one of: none, indexed, all")
         if not isinstance(top_k, int) or top_k < 1:
             raise ValueError("top_k must be a positive integer")
+        if namespace is not None:
+            if not namespace:
+                raise ValueError("Namespace cannot be empty")
+            if len(namespace) > 64:
+                raise ValueError("Namespace cannot exceed 64 characters")
             
         url = f"{self.base_url}/indexes/{index_name}/query"
         data = {
@@ -261,6 +290,8 @@ class CloudflareVectorize:
         }
         if filter:
             data["filter"] = filter
+        if namespace:
+            data["namespace"] = namespace
             
         return self._request('POST', url, json=data)
 
@@ -317,7 +348,8 @@ class CloudflareVectorize:
     def upsert_vectors(self, 
                       index_name: str, 
                       vectors_data: str, 
-                      unparsable_behavior: str = "error") -> Dict:
+                      unparsable_behavior: str = "error",
+                      namespace: Optional[str] = None) -> Dict:
         """
         更新或插入向量
         
@@ -325,6 +357,7 @@ class CloudflareVectorize:
             index_name: 索引名称
             vectors_data: NDJSON格式的向量数据
             unparsable_behavior: 解析失败处理方式 (error/discard)
+            namespace: 命名空间，用于分段管理向量（可选，最大64字符）
             
         Returns:
             包含mutation_id的响应数据
@@ -332,7 +365,27 @@ class CloudflareVectorize:
         Raises:
             ValueError: 当向量数据格式无效时
             APIError: 当API调用失败时
+            
+        Note:
+            如果指定了namespace参数，会自动为vectors_data中的每个向量添加namespace字段
         """
+        # 如果指定了namespace，需要为每个向量添加namespace字段
+        if namespace is not None:
+            if not namespace:
+                raise ValueError("Namespace cannot be empty")
+            if len(namespace) > 64:
+                raise ValueError("Namespace cannot exceed 64 characters")
+            
+            # 解析NDJSON并添加namespace
+            lines = vectors_data.strip().split('\n')
+            updated_lines = []
+            for line in lines:
+                if line.strip():
+                    vector = json.loads(line)
+                    vector['namespace'] = namespace
+                    updated_lines.append(json.dumps(vector))
+            vectors_data = '\n'.join(updated_lines)
+        
         # 验证向量数据格式
         validate_vector_format(vectors_data)
         

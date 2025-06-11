@@ -101,5 +101,26 @@ def validate_vector_format(vector_data: str) -> None:
                     raise ValueError("Each vector must contain 'values' field")
                 if not isinstance(vector['values'], list):
                     raise ValueError("Vector values must be an array")
+                
+                # 验证namespace字段（如果存在）
+                if 'namespace' in vector:
+                    namespace = vector['namespace']
+                    if not isinstance(namespace, str):
+                        raise ValueError("Namespace must be a string")
+                    if len(namespace) > 64:
+                        raise ValueError("Namespace cannot exceed 64 characters")
+                    if not namespace:
+                        raise ValueError("Namespace cannot be empty")
+                        
+                # 验证id字段（如果存在）
+                if 'id' in vector:
+                    if not isinstance(vector['id'], str):
+                        raise ValueError("Vector id must be a string")
+                        
+                # 验证metadata字段（如果存在）
+                if 'metadata' in vector:
+                    if not isinstance(vector['metadata'], dict):
+                        raise ValueError("Vector metadata must be an object")
+                        
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON format: {str(e)}")
