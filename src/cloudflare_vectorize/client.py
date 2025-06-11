@@ -227,7 +227,18 @@ class CloudflareVectorize:
                 if line.strip():
                     vector = json.loads(line)
                     vector['namespace'] = namespace
-                    updated_lines.append(json.dumps(vector))
+                    updated_lines.append(json.dumps(vector, ensure_ascii=False))
+            vectors_data = '\n'.join(updated_lines)
+        
+        # 确保原始数据也正确处理中文字符
+        else:
+            # 重新序列化原始数据以确保中文字符正确处理
+            lines = vectors_data.strip().split('\n')
+            updated_lines = []
+            for line in lines:
+                if line.strip():
+                    vector = json.loads(line)
+                    updated_lines.append(json.dumps(vector, ensure_ascii=False))
             vectors_data = '\n'.join(updated_lines)
         
         # 验证向量数据格式
@@ -238,8 +249,8 @@ class CloudflareVectorize:
             url += f"?unparsable-behavior={unparsable_behavior}"
             
         headers = self.headers.copy()
-        headers["Content-Type"] = "application/x-ndjson"
-        return self._request('POST', url, headers=headers, data=vectors_data)
+        headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
+        return self._request('POST', url, headers=headers, data=vectors_data.encode('utf-8'))
 
     def query_vectors(self, 
                      index_name: str,
@@ -383,7 +394,18 @@ class CloudflareVectorize:
                 if line.strip():
                     vector = json.loads(line)
                     vector['namespace'] = namespace
-                    updated_lines.append(json.dumps(vector))
+                    updated_lines.append(json.dumps(vector, ensure_ascii=False))
+            vectors_data = '\n'.join(updated_lines)
+        
+        # 确保原始数据也正确处理中文字符
+        else:
+            # 重新序列化原始数据以确保中文字符正确处理
+            lines = vectors_data.strip().split('\n')
+            updated_lines = []
+            for line in lines:
+                if line.strip():
+                    vector = json.loads(line)
+                    updated_lines.append(json.dumps(vector, ensure_ascii=False))
             vectors_data = '\n'.join(updated_lines)
         
         # 验证向量数据格式
@@ -394,5 +416,5 @@ class CloudflareVectorize:
             url += f"?unparsable-behavior={unparsable_behavior}"
             
         headers = self.headers.copy()
-        headers["Content-Type"] = "application/x-ndjson"
-        return self._request('POST', url, headers=headers, data=vectors_data)
+        headers["Content-Type"] = "application/x-ndjson; charset=utf-8"
+        return self._request('POST', url, headers=headers, data=vectors_data.encode('utf-8'))
