@@ -10,7 +10,7 @@ def test_chinese_metadata():
     # 使用示例配置，你需要替换为实际的配置
     client = CloudflareVectorize(
         account_id="your-account-id",
-        auth_config={"bearer_token": "your-token"}
+        auth_config={"bearer_token": "your-bearer-token"}
     )
     
     print("🇨🇳 测试中文 metadata 处理")
@@ -30,7 +30,13 @@ def test_chinese_metadata():
     }
     
     # 构建 NDJSON 数据
-    vectors_data = f'{{"id": "{test_id}", "values": {test_vector}, "metadata": {chinese_metadata}}}'
+    import json
+    vector_data = {
+        "id": test_id,
+        "values": test_vector,
+        "metadata": chinese_metadata
+    }
+    vectors_data = json.dumps(vector_data, ensure_ascii=False)
     
     print(f"📄 测试数据:")
     print(f"  ID: {test_id}")
@@ -79,7 +85,12 @@ def test_chinese_metadata():
         # 测试 namespace 功能
         print(f"\n🏷️  测试带 namespace 的中文 metadata...")
         namespace_test_id = f"ns_chinese_test_{int(time.time())}"
-        namespace_vectors_data = f'{{"id": "{namespace_test_id}", "values": {test_vector}, "metadata": {chinese_metadata}}}'
+        namespace_vector_data = {
+            "id": namespace_test_id,
+            "values": test_vector,
+            "metadata": chinese_metadata
+        }
+        namespace_vectors_data = json.dumps(namespace_vector_data, ensure_ascii=False)
         
         result = client.insert_vectors(
             index_name="tutorial-index",

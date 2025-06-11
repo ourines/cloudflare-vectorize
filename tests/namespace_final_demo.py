@@ -3,8 +3,8 @@ import random
 import time
 
 client = CloudflareVectorize(
-    account_id="REMOVED_ACCOUNT_ID",
-    auth_config={"bearer_token": "REMOVED_BEARER_TOKEN", "auth_email": "xxx"}
+    account_id="your-account-id",
+    auth_config={"bearer_token": "your-bearer-token", "auth_email": "your-email"}
 )
 
 print("🎉 Cloudflare Vectorize Namespace 功能验证")
